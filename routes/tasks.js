@@ -24,8 +24,38 @@ router.post('/', (req, res) => {
 
     tasks.push(newTask);
     saveTasksToFile();
-    // res.send('Hello, API!');
     res.status(201).json(newTask);
+});
+
+router.put('/:id', (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const taskIndex = tasks.findIndex(task => task.id === id);
+
+    if (taskIndex === -1) {
+        return res.status(404).json({message: 'Task not found'});
+    }
+
+    tasks[taskIndex] = {
+        ...tasks[taskIndex],
+        task: req.body.task || tasks[taskIndex].task,
+        completed: req.body.completed !== undefined ? req.body.completed : tasks[taskIndex].completed
+    };
+
+    saveTasksToFile();
+    res.status(201).json(tasks[taskIndex]);
+});
+
+router.delete('/:id', (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const taskIndex = tasks.findIndex (task => task.id === id);
+
+    if (taskIndex === -1) {
+        return res.status(404).json({message: 'Task not found'});
+    }
+
+    const deletedTask = tasks.splice(taskIndex, 1);
+    saveTasksToFile();
+    res.json(deletedTask[0]);
 });
 
 module.exports = router;
